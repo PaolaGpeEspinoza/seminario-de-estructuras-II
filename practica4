@@ -1,1 +1,139 @@
+/*
+Equipo 1
+
+Andres Hernandez Abel
+Espinoza Serrano Paola Guadalupe
+Ivan Garcia Nuño
+Seccion D19
+Calendario 2024 A
+*/
+
+#include <iostream>
+#include <iomanip>
+#include <fstream>
+#include <cstdlib>
+#include "Deportista.h"
+
+using namespace std;
+
+void imprimirLinea( ostream&, const Deportista&);
+
+int main() {
+int numeroDeSocio;
+char nombre [15];
+int edad;
+char deporte [15];
+Deportista d;
+int opc=0, confDel=0;
+
+
+fstream archivoDeportistasComb;
+archivoDeportistasComb.open("deportistas.dat", ios::in | ios::binary | ios::out);
+
+if (!archivoDeportistasComb) {
+cerr << "No se pudo abrir el archivo.";
+exit(1);
+}
+
+
+cout<< "MENU - ASOSIACION DE DEPORTISTAS TAPATIOS \n";
+do {
+cout<< "1. Altas \n";
+cout<< "2. Bajas \n";
+cout<< "3. Cambios \n";
+cout<< "4. Consulta individual (numero de socio) \n";
+cout<< "5. Consultas generales (formato de tabla) \n";
+cout<< "6. Salir \n";
+cout<< "Elige tu opcion: \n";
+cin>>opc;
+
+
+switch (opc){
+
+case 1:
+    cout <<"Escriba el numero de socio (de 1 a 100, 0 para terminar la entrada)\n?";
+    cin >>numeroDeSocio;
+    d.establecerNumeroDeSocio(numeroDeSocio);
+
+    while (d.obtenerNumeroDeSocio()>=1 && d.obtenerNumeroDeSocio()<=100){
+        cout<<"Teclea nombre, edad, deporte \n?";
+        cin>> setw(15)>> nombre;
+        cin>> edad;
+        cin>> setw(15)>> deporte;
+
+
+        d.establecerNombre(nombre);
+        d.establecerEdad(edad);
+        d.establecerDeporte(deporte);
+
+
+        archivoDeportistasComb.seekp((d.obtenerNumeroDeSocio()-1) * sizeof(Deportista));
+        archivoDeportistasComb.write(reinterpret_cast<const char*>(&d),sizeof (Deportista));
+
+        cout <<"Escriba el numero de socio (de 1 a 100, 0 para terminar la entrada)\n?";
+        cin >>numeroDeSocio;
+        d.establecerNumeroDeSocio(numeroDeSocio);
+
+    }
+    break;
+
+case 2:
+    cout<<"Escriba el numero de socio a eliminar (de 1 a 100)\n";
+    cin>>numeroDeSocio;
+    d.establecerNumeroDeSocio(numeroDeSocio);
+
+    archivoDeportistasComb.seekg((d.obtenerNumeroDeSocio()-1)*sizeof(Deportista));
+    archivoDeportistasComb.read (reinterpret_cast<char*>(&d),sizeof(Deportista));
+
+    if (numeroDeSocio != d.obtenerNumeroDeSocio()){
+        cerr<<"No se encuentra socio asociado al numero dado.";
+    }
+    if (d.obtenerNumeroDeSocio()!=0){
+        cout<<"¿Estas seguro sobre eliminar este registro 1(si)?";
+        
+    }
+
+case 4:
+    cout<<"Escriba el numero de socio (de 1 a 100)\n";
+    cin>>numeroDeSocio;
+    d.establecerNumeroDeSocio(numeroDeSocio);
+
+    archivoDeportistasComb.seekg((d.obtenerNumeroDeSocio()-1)*sizeof(Deportista));
+    archivoDeportistasComb.read (reinterpret_cast<char*>(&d),sizeof(Deportista));
+
+    if (numeroDeSocio != d.obtenerNumeroDeSocio()){
+        cerr<<"No se encuentra socio asociado al numero dado.";
+        }
+
+    cout<< "Datos de Deportista \n";
+    cout<< "Numero de Socio: ";
+    cout<< d.obtenerNumeroDeSocio()<<"\n";
+    cout<< "Nombre: ";
+    cout<< d.obtenerNombre()<<"\n";
+    cout<< "Edad: ";
+    cout<< d.obtenerEdad()<<"\n";
+    cout<< "Deporte: ";
+    cout<< d.obtenerDeporte()<<"\n";
+    break;
+
+case 5:
+    cout <<left<<setw(17)<<"Numero De Socio" << setw(17) << "Nombre" << setw(6) << "Edad" <<"Deporte"  << endl;
+
+    Deportista d;
+    archivoDeportistasComb.read(reinterpret_cast<char*>(&d),sizeof(Deportista));
+
+    while ( archivoDeportistasComb && !archivoDeportistasComb.eof()){
+    if ( d.obtenerNumeroDeSocio() != 0 )
+    {
+    cout << left << setw(17) << d.obtenerNumeroDeSocio() << setw(17) << d.obtenerNombre() << setw(6) << d.obtenerEdad() << d.obtenerDeporte() << endl;
+    }
+    archivoDeportistasComb.read(reinterpret_cast<char*>(&d),sizeof(Deportista));
+    }
+    break;
+};
+}
+while (opc!=6);
+archivoDeportistasComb.close();
+}
+
 
